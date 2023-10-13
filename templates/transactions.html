@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>All Transactions</title>
+</head>
+<body>
+    <body class="bg-light">
+        <header class="bg-success text-white text-center py-3">
+            <h1>My AccountBook</h1>
+            <nav>
+                <a href="/" class="text-white me-3">Home</a>
+                <a href="#" class="text-white me-3">Transactions</a>
+                <a href="#" class="text-white">Report</a>
+            </nav>
+        </header>
+    <div class="container mt-4">
+        <h1>All Transactions</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Type</th>
+                    <th>Payment Method</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.TransactionDate }}</td>
+                        <td>{{ transaction.Category }}</td>
+                        <td>{{ transaction.Description }}</td>
+                        <td>{{ transaction.Amount }}</td>
+                        <td>{{ transaction.TransactionType }}</td>
+                        <td>{{ transaction.PaymentMethod }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
