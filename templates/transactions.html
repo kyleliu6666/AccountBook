@@ -39,8 +39,8 @@
                     {% for transaction in transactions %}
                         <tr data-id="{{ transaction.TransactionID }}">            
                             <td>{{ transaction.TransactionDate }}</td>
-                            <td>{{ transaction.Category }}</td>
-                            <td contenteditable="true" data-original="{{ transaction.Description }}" onblur="saveChanges(this)">{{ transaction.Description }}</td>
+                            <td contenteditable="true" data-original="{{ transaction.Category }}" onblur="saveChanges(this, 'category')">{{ transaction.Category }}</td>
+                            <td contenteditable="true" data-original="{{ transaction.Description }}" onblur="saveChanges(this, 'description')">{{ transaction.Description }}</td>
                             <td>{{ transaction.Amount|round|int }}</td>
                             <td>{{ transaction.TransactionType }}</td>
                             <td>{{ transaction.PaymentMethod }}</td>
@@ -57,25 +57,31 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function saveChanges(cell) {
+        function saveChanges(cell, type) {
             const $cell = $(cell);
-            const originalDescription = $cell.attr('data-original');
-            const currentDescription = $cell.text();
-
+            const originalValue = $cell.attr('data-original');
+            const currentValue = $cell.text();
+    
             // 如果值沒有更改，則直接返回
-            if (currentDescription === originalDescription) {
+            if (currentValue === originalValue) {
                 return;
             }
             const row = $(cell).closest('tr');
             const transactionId = row.data('id');
-
+    
+            let data = {};
+    
+            // 根據type來判斷要更新哪個欄位
+            if (type === 'description') {
+                data.description = currentValue;
+            } else if (type === 'category') {
+                data.category = currentValue;
+            }
+    
             $.ajax({
                 url: `/update/${transactionId}`,
                 method: 'POST',
-                data: {
-                    description: currentDescription,
-                    // ...其他欄位資料
-                },
+                data: data,
                 success: function(response){
                     console.log('Updated successfully!');
                 },

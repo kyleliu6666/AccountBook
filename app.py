@@ -100,18 +100,35 @@ def delete_transaction(transaction_id):
 def update_transaction(transaction_id):
     description = request.form.get('description')
     category = request.form.get('category')
-    # 可以按需求增加其他的欄位
+
+    fields = []
+    values = []
+
+    if description is not None:
+        fields.append("Description=%s")
+        values.append(description)
+    
+    if category is not None:
+        fields.append("Category=%s")
+        values.append(category)
+
+    values.append(transaction_id)
+
+    # 如果沒有任何欄位需要更新，則直接返回
+    if not fields:
+        return jsonify(error="No fields provided to update"), 400
 
     try:
         connection = pymysql.connect(**db_config)
-        cursor = connection.cursor(pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
-            sql = "UPDATE Transactions SET Description=%s, Category=%s WHERE TransactionID=%s"
-            cursor.execute(sql, (description, category, transaction_id))
+            sql = "UPDATE Transactions SET " + ", ".join(fields) + " WHERE TransactionID=%s"
+            cursor.execute(sql, tuple(values))
             connection.commit()
             return jsonify(success=True), 200
     except Exception as e:
         return jsonify(error=str(e)), 500
+    finally:
+        connection.close()
 
 
 
