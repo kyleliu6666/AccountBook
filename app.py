@@ -56,7 +56,7 @@ def add_transaction():
 
 @app.route('/transactions', methods=['GET'])
 def transactions():
-    title = "All Transactions"
+    title = "Day Transactions"
     # Connect to the database
     connection = pymysql.connect(**db_config)
     
@@ -65,7 +65,7 @@ def transactions():
         cursor = connection.cursor(pymysql.cursors.DictCursor)
         
         # Execute SQL query to select all transactions
-        cursor.execute("SELECT * FROM Transactions order by TransactionDate")
+        cursor.execute("SELECT * FROM Transactions WHERE DATE(TransactionDate) = CURDATE() ORDER BY TransactionDate DESC;")
    
         # Fetch all the records
         transactions = cursor.fetchall()
@@ -76,6 +76,49 @@ def transactions():
     # Render the transactions template and pass the transactions data
     return render_template('transactions.html', transactions=transactions,title=title)
 
+@app.route('/month_transactions', methods=['GET'])
+def month_transactions():
+    title = "Month Transactions"
+    # Connect to the database
+    connection = pymysql.connect(**db_config)
+    
+    try:
+        # Create a cursor object
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        
+        # Execute SQL query to select all transactions
+        cursor.execute("SELECT * FROM Transactions WHERE TransactionDate BETWEEN CURDATE() - INTERVAL 1 MONTH AND CURDATE() ORDER BY TransactionDate DESC;")
+   
+        # Fetch all the records
+        transactions = cursor.fetchall()
+    finally:
+        # Close the database connection
+        connection.close()
+    
+    # Render the transactions template and pass the transactions data
+    return render_template('transactions.html', transactions=transactions,title=title)
+
+@app.route('/year_transactions', methods=['GET'])
+def year_transactions():
+    title = "Year Transactions"
+    # Connect to the database
+    connection = pymysql.connect(**db_config)
+    
+    try:
+        # Create a cursor object
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        
+        # Execute SQL query to select all transactions
+        cursor.execute("SELECT * FROM Transactions WHERE TransactionDate BETWEEN CURDATE() - INTERVAL 1 YEAR AND CURDATE() ORDER BY TransactionDate DESC;")
+   
+        # Fetch all the records
+        transactions = cursor.fetchall()
+    finally:
+        # Close the database connection
+        connection.close()
+    
+    # Render the transactions template and pass the transactions data
+    return render_template('transactions.html', transactions=transactions,title=title)
 
 @app.route('/delete/<int:transaction_id>', methods=['POST'])
 def delete_transaction(transaction_id):
