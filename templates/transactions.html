@@ -25,7 +25,7 @@
             <a href="year_transactions" id="year-report-btn" class="btn btn-outline-primary">年報表</a>
         </div>
         <div class="container mt-4">
-            <h5 class="mb-3">Total Spent: <span id="total-amount">{{ total_amount }}</span></h5>
+            <h5 class="mb-3">Total Spent: <span id="total-amount">{{ total_spent }}</span></h5>
         </div>
             <table class="table table-hover">
                 <thead>
@@ -34,7 +34,7 @@
                         <th class="text-truncate">Category</th>
                         <th class="text-truncate">Description</th>
                         <th class="text-truncate">Amount</th>
-                        <th class="text-truncate">Type</th>
+                        <th class="text-truncate" style="display: none;">Type</th>
                         <th class="text-truncate">Payment Method</th>
                         <th class="text-truncate">Actions</th>
                     </tr>
@@ -45,8 +45,13 @@
                             <td class="text-truncate">{{ transaction.TransactionDate }}</td>
                             <td class="text-truncate" contenteditable="true" data-original="{{ transaction.Category }}" onblur="saveChanges(this, 'category')">{{ transaction.Category }}</td>
                             <td class="text-truncate" contenteditable="true" data-original="{{ transaction.Description }}" onblur="saveChanges(this, 'description')">{{ transaction.Description }}</td>
-                            <td class="text-truncate">{{ transaction.Amount|round|int }}</td>
-                            <td class="text-truncate">{{ transaction.TransactionType }}</td>
+                            <td class="text-truncate">
+                                {% if transaction.TransactionType == 'Expense' %}
+                                -{{ transaction.Amount|round|int }}
+                            {% else %}
+                                {{ transaction.Amount|round|int }}
+                            {% endif %}</td>
+                            <td class="text-truncate" style="display: none;">{{ transaction.TransactionType }}</td>
                             <td class="text-truncate">{{ transaction.PaymentMethod }}</td>
                             <td class="text-truncate">
                                 <form action="/delete/{{ transaction.TransactionID }}" method="post" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this transaction?');">

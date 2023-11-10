@@ -57,68 +57,59 @@ def add_transaction():
 @app.route('/transactions', methods=['GET'])
 def transactions():
     title = "Day Transactions"
-    # Connect to the database
     connection = pymysql.connect(**db_config)
     
     try:
-        # Create a cursor object
         cursor = connection.cursor(pymysql.cursors.DictCursor)
         
-        # Execute SQL query to select all transactions
         cursor.execute("SELECT * FROM Transactions WHERE DATE(TransactionDate) = CURDATE() ORDER BY TransactionDate DESC;")
    
-        # Fetch all the records
         transactions = cursor.fetchall()
+
+        cursor.execute("SELECT SUM(Amount) AS total_spent FROM Transactions WHERE DATE(TransactionDate) = CURDATE();")
+        total_spent = round(cursor.fetchone()['total_spent'])
+
     finally:
-        # Close the database connection
         connection.close()
     
-    # Render the transactions template and pass the transactions data
-    return render_template('transactions.html', transactions=transactions,title=title)
+    return render_template('transactions.html', transactions=transactions,total_spent=total_spent,title=title)
 
 @app.route('/month_transactions', methods=['GET'])
 def month_transactions():
     title = "Month Transactions"
-    # Connect to the database
     connection = pymysql.connect(**db_config)
     
     try:
-        # Create a cursor object
         cursor = connection.cursor(pymysql.cursors.DictCursor)
         
-        # Execute SQL query to select all transactions
-        cursor.execute("SELECT * FROM Transactions WHERE TransactionDate BETWEEN CURDATE() - INTERVAL 1 MONTH AND CURDATE() ORDER BY TransactionDate DESC;")
+        cursor.execute("SELECT * FROM Transactions WHERE MONTH(TransactionDate) = MONTH(CURDATE()) AND YEAR(TransactionDate) = YEAR(CURDATE()) ORDER BY TransactionDate DESC;")
    
-        # Fetch all the records
         transactions = cursor.fetchall()
+
+        cursor.execute("SELECT SUM(Amount) AS total_spent FROM Transactions WHERE MONTH(TransactionDate) = MONTH(CURDATE()) AND YEAR(TransactionDate) = YEAR(CURDATE());")
+
+        total_spent = round(cursor.fetchone()['total_spent'])
+
     finally:
-        # Close the database connection
         connection.close()
-    
-    # Render the transactions template and pass the transactions data
-    return render_template('transactions.html', transactions=transactions,title=title)
+
+    return render_template('transactions.html', transactions=transactions,total_spent=total_spent,title=title)
 
 @app.route('/year_transactions', methods=['GET'])
 def year_transactions():
     title = "Year Transactions"
-    # Connect to the database
     connection = pymysql.connect(**db_config)
-    
     try:
-        # Create a cursor object
         cursor = connection.cursor(pymysql.cursors.DictCursor)
-        
-        # Execute SQL query to select all transactions
         cursor.execute("SELECT * FROM Transactions WHERE TransactionDate BETWEEN CURDATE() - INTERVAL 1 YEAR AND CURDATE() ORDER BY TransactionDate DESC;")
-   
-        # Fetch all the records
         transactions = cursor.fetchall()
+
+        cursor.execute("SELECT SUM(Amount) AS total_spent FROM Transactions WHERE YEAR(TransactionDate) = YEAR(CURDATE());")
+        total_spent = round(cursor.fetchone()['total_spent'])
     finally:
-        # Close the database connection
         connection.close()
     
-    # Render the transactions template and pass the transactions data
-    return render_template('transactions.html', transactions=transactions,title=title)
+    return render_template('transactions.html', transactions=transactions,total_spent=total_spent,title=title)
 
 @app.route('/delete/<int:transaction_id>', methods=['POST'])
 def delete_transaction(transaction_id):
