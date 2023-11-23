@@ -17,7 +17,7 @@ db_config = {
 # Route to display the form
 @app.route('/')
 def index():
-    title = "AccountBook"
+    title = "Spendalytics"
     return render_template('home.html', title=title)
 
 @app.route('/add-transaction', methods=['POST'])
@@ -67,7 +67,15 @@ def transactions():
         transactions = cursor.fetchall()
 
         cursor.execute("SELECT SUM(Amount) AS total_spent FROM Transactions WHERE DATE(TransactionDate) = CURDATE();")
-        total_spent = round(cursor.fetchone()['total_spent'])
+
+        # total_spent = round(cursor.fetchone()['total_spent'])
+
+        result = cursor.fetchone()['total_spent']
+        if result is None:
+            total_spent = 0  # 或適當的預設值
+        else:
+            total_spent = round(result)
+
 
     finally:
         connection.close()
