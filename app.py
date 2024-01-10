@@ -68,8 +68,6 @@ def transactions():
 
         cursor.execute("SELECT SUM(Amount) AS total_spent FROM Transactions WHERE DATE(TransactionDate) = CURDATE();")
 
-        # total_spent = round(cursor.fetchone()['total_spent'])
-
         result = cursor.fetchone()['total_spent']
         if result is None:
             total_spent = 0  # 或適當的預設值
@@ -95,8 +93,12 @@ def month_transactions():
         transactions = cursor.fetchall()
 
         cursor.execute("SELECT SUM(Amount) AS total_spent FROM Transactions WHERE MONTH(TransactionDate) = MONTH(CURDATE()) AND YEAR(TransactionDate) = YEAR(CURDATE());")
-
-        total_spent = round(cursor.fetchone()['total_spent'])
+        
+        result = cursor.fetchone()['total_spent']
+        if result is None:
+            total_spent = 0  # 或適當的預設值
+        else:
+            total_spent = round(result)
 
     finally:
         connection.close()
@@ -113,7 +115,14 @@ def year_transactions():
         transactions = cursor.fetchall()
 
         cursor.execute("SELECT SUM(Amount) AS total_spent FROM Transactions WHERE YEAR(TransactionDate) = YEAR(CURDATE());")
-        total_spent = round(cursor.fetchone()['total_spent'])
+
+        result = cursor.fetchone()['total_spent']
+        if result is None:
+            total_spent = 0  # 或適當的預設值
+        else:
+            total_spent = round(result)
+
+
     finally:
         connection.close()
     
