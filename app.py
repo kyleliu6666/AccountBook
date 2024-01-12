@@ -2,16 +2,19 @@ from flask import Flask, request, render_template, redirect, url_for , flash,jso
 import pymysql
 import requests
 from datetime import date
+from dotenv import load_dotenv
+load_dotenv()
+import os
 
 app = Flask(__name__)
 
 
 # Database configuration
 db_config = {
-    'host': '127.0.0.1',
-    'user': 'root',
-    'password': 'password',
-    'database': 'MyAccountBook'
+    'host': os.getenv("DB_IP"),
+    'user': os.getenv("DB_USER"),
+    'password': os.getenv("DB_PW"),
+    'database': os.getenv("DB_NAME")
 }
 
 # Route to display the form
@@ -111,7 +114,7 @@ def year_transactions():
     connection = pymysql.connect(**db_config)
     try:
         cursor = connection.cursor(pymysql.cursors.DictCursor)
-        cursor.execute("SELECT * FROM Transactions WHERE TransactionDate BETWEEN CURDATE() - INTERVAL 1 YEAR AND CURDATE() ORDER BY TransactionDate DESC;")
+        cursor.execute("SELECT * FROM MyAccountBook.Transactions WHERE TransactionDate >= MAKEDATE(YEAR(CURDATE()), 1) AND TransactionDate <= CURDATE() ORDER BY TransactionDate DESC;")
         transactions = cursor.fetchall()
 
         cursor.execute("SELECT SUM(Amount) AS total_spent FROM Transactions WHERE YEAR(TransactionDate) = YEAR(CURDATE());")
@@ -184,4 +187,4 @@ def update_transaction(transaction_id):
 
 
 if __name__ == '__main__':
-     app.run(host='0.0.0.0', port=80)
+     app.run(host='0.0.0.0', port=os.getenv("SERVICE_PORT"))
