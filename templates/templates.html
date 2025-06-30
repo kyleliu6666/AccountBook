@@ -8,56 +8,79 @@
     <title>{{ title }}</title>
 </head>
     <body class="bg-light">
-        <header class="bg-success text-white text-center py-3">
-            <h1>Spendalytics</h1>
-            <nav>
-                <a href="/" class="text-white me-3">New</a>
-                <a href="/transactions" class="text-white me-3">Transactions</a>
-                <a href="/templates" class="text-white me-3">Templates</a>
-                <a href="https://line.me/ti/p/cn9-4_ryci" class="text-white">Report</a>
-            </nav>
-        </header>
-    <div class="container mt-4">
-        <section class="mb-4 p-4 bg-white rounded">
-        <h2 class="mb-3">Transactions</h2>
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th class="text-truncate">TemplateName</th>
-                        <th class="text-truncate">Category</th>
-                        <th class="text-truncate">Description</th>
-                        <th class="text-truncate">Amount</th>
-                        <th class="text-truncate" style="display: none;">Type</th>
-                        <th class="text-truncate">Payment Method</th>
-                        <th class="text-truncate">Merchant</th>
-                        <th class="text-truncate">Location</th>
-                        <th class="text-truncate">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for transaction in transactions %}
-                    <tr data-id="{{ transaction.TransactionID }}">
-                    <td class="text-truncate" contenteditable="true" data-original="{{ transaction.TemplateName }}" onblur="saveChanges(this, 'TemplateName')">{{ transaction.TemplateName }}</td>           
-                    <td class="text-truncate" contenteditable="true" data-original="{{ transaction.Category }}" onblur="saveChanges(this, 'category')">{{ transaction.Category }}</td>
-                    <td class="text-truncate" contenteditable="true" data-original="{{ transaction.Description }}" onblur="saveChanges(this, 'description')">{{ transaction.Description }}</td>
-                    <td class="text-truncate">{% if transaction.TransactionType == 'Expense' %}-{{ transaction.Amount|round|int }}
-                            {% else %}
-                                {{ transaction.Amount|round|int }}
-                            {% endif %}</td>
-                    <td class="text-truncate" style="display: none;">{{ transaction.TransactionType }}</td>
-                    <td class="text-truncate">{{ transaction.PaymentMethod }}</td>
-                    <td class="text-truncate">{{ transaction.Merchant }}</td>
-                    <td class="text-truncate">{{ transaction.Location }}</td>
-                    <td class="text-truncate">
-                                <form action="/delete/{{ transaction.TransactionID }}" method="post" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this transaction?');">
-                                    <button type="submit" class="btn btn-danger">Delete</button>
-                            </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-    </section>
-    </div>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">Spendalytics</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">New</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/transactions">Transactions</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/templates">Templates</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://line.me/ti/p/cn9-4_ryci">Report</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-5">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Templates</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-truncate">TemplateName</th>
+                                    <th class="text-truncate">Category</th>
+                                    <th class="text-truncate">Description</th>
+                                    <th class="text-truncate">Amount</th>
+                                    <th class="text-truncate" style="display: none;">Type</th>
+                                    <th class="text-truncate">Payment Method</th>
+                                    <th class="text-truncate">Merchant</th>
+                                    <th class="text-truncate">Location</th>
+                                    <th class="text-truncate">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in transactions %}
+                                <tr data-id="{{ transaction.TemplateID }}">
+                                <td class="text-truncate" data-original="{{ transaction.TemplateName }}"><a href="/new?category={{ transaction.Category }}&description={{ transaction.Description }}&amount={{ transaction.Amount|round|int }}&type={{ transaction.TransactionType }}&payment_method={{ transaction.PaymentMethod }}&merchant={{ transaction.Merchant }}&location={{ transaction.Location }}">{{ transaction.TemplateName }}</a></td>           
+                                <td class="text-truncate" contenteditable="true" data-original="{{ transaction.Category }}" onblur="saveChanges(this, 'category')">{{ transaction.Category }}</td>
+                                <td class="text-truncate" contenteditable="true" data-original="{{ transaction.Description }}" onblur="saveChanges(this, 'description')">{{ transaction.Description }}</td>
+                                <td class="text-truncate">{% if transaction.TransactionType == 'Expense' %}-{{ transaction.Amount|round|int }}
+                                        {% else %}
+                                            {{ transaction.Amount|round|int }}
+                                        {% endif %}</td>
+                                <td class="text-truncate" style="display: none;">{{ transaction.TransactionType }}</td>
+                                <td class="text-truncate">{{ transaction.PaymentMethod }}</td>
+                                <td class="text-truncate">{{ transaction.Merchant }}</td>
+                                <td class="text-truncate">{{ transaction.Location }}</td>
+                                <td class="text-truncate">
+                                            <form action="/delete_template/{{ transaction.TemplateID }}" method="post" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this template?');">
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -72,7 +95,7 @@
                 return;
             }
             const row = $(cell).closest('tr');
-            const transactionId = row.data('id');
+            const templateId = row.data('id');
     
             let data = {};
     
@@ -84,14 +107,14 @@
             }
     
             $.ajax({
-                url: `/update/${transactionId}`,
+                url: `/update_template/${templateId}`,
                 method: 'POST',
                 data: data,
                 success: function(response){
                     console.log('Updated successfully!');
                 },
                 error: function(error){
-                    alert('Error updating transaction.');
+                    alert('Error updating template.');
                 }
             });
         }

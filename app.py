@@ -7,6 +7,7 @@ load_dotenv()
 import os
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 
 
 # Database configuration
@@ -20,8 +21,19 @@ db_config = {
 # Route to display the form
 @app.route('/')
 def index():
+    return redirect('/new')
+
+@app.route('/new')
+def new():
     title = "Spendalytics"
-    return render_template('home.html', title=title)
+    connection = pymysql.connect(**db_config)
+    try:
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT * FROM MyAccountBook.TransactionTemplates;")
+        templates = cursor.fetchall()
+    finally:
+        connection.close()
+    return render_template('new.html', title=title, templates=templates)
 
 @app.route('/add-transaction', methods=['POST'])
 def add_transaction():
@@ -51,7 +63,7 @@ def add_transaction():
             finally:
                 connection.close()
             
-            return redirect(url_for('index'))
+            return redirect(url_for('transactions'))
         except Exception as e:
             print(f"An error occurred: {str(e)}")
             return 'Form submission failed', 400
@@ -144,27 +156,26 @@ def year_transactions():
     
     return render_template('transactions.html', transactions=transactions,total_spent=total_spent,title=title)
 
-@app.route('/delete/<int:transaction_id>', methods=['POST'])
-def delete_transaction(transaction_id):
+@app.route('/delete_template/<int:template_id>', methods=['POST'])
+def delete_template(template_id):
     try:
         connection = pymysql.connect(**db_config)
         cursor = connection.cursor(pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
-            sql = "DELETE FROM Transactions WHERE TransactionID = %s"
-            cursor.execute(sql, (transaction_id,))
+            sql = "DELETE FROM TransactionTemplates WHERE TemplateID = %s"
+            cursor.execute(sql, (template_id,))
             connection.commit()
             if cursor.rowcount:
-                flash('Transaction deleted successfully.', 'success')
+                flash('Template deleted successfully.', 'success')
             else:
-                flash('Transaction not found.', 'error')
+                flash('Template not found.', 'error')
     except Exception as e:
         flash(f'An error occurred: {e}', 'error')
     finally:
-        return redirect(url_for('transactions'))
+        return redirect(url_for('templates'))
 
-
-@app.route('/update/<int:transaction_id>', methods=['POST'])
-def update_transaction(transaction_id):
+@app.route('/update_template/<int:template_id>', methods=['POST'])
+def update_template(template_id):
     description = request.form.get('description')
     category = request.form.get('category')
 
@@ -179,7 +190,7 @@ def update_transaction(transaction_id):
         fields.append("Category=%s")
         values.append(category)
 
-    values.append(transaction_id)
+    values.append(template_id)
 
     # 如果沒有任何欄位需要更新，則直接返回
     if not fields:
@@ -188,7 +199,7 @@ def update_transaction(transaction_id):
     try:
         connection = pymysql.connect(**db_config)
         with connection.cursor() as cursor:
-            sql = "UPDATE Transactions SET " + ", ".join(fields) + " WHERE TransactionID=%s"
+            sql = "UPDATE TransactionTemplates SET " + ", ".join(fields) + " WHERE TemplateID=%s"
             cursor.execute(sql, tuple(values))
             connection.commit()
             return jsonify(success=True), 200
