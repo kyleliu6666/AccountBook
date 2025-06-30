@@ -57,6 +57,19 @@ def add_transaction():
             return 'Form submission failed', 400
     return redirect(url_for('transactions'))
 
+@app.route('/templates', methods=['GET'])
+def templates():
+    title = "Templates"
+    connection = pymysql.connect(**db_config)
+    try:
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT * FROM MyAccountBook.TransactionTemplates;")
+        transactions = cursor.fetchall()
+    finally:
+        connection.close()
+
+    return render_template('templates.html', transactions=transactions,title=title)
+
 @app.route('/transactions', methods=['GET'])
 def transactions():
     title = "Day Transactions"
